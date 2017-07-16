@@ -14,7 +14,7 @@ def getLinks(wnid):
             links.append(line.strip().decode())
 
     os.remove("data/links.tmp")
-    print(links)
+    print(str(len(links)) + " links found")
     return links
 
 def download_images(links, folder_name):
@@ -23,13 +23,16 @@ def download_images(links, folder_name):
 
     i = 0
     for link in links:
+        print(str(round(100*i/len(links), 1)) + "%")
         try:
             urllib.request.urlretrieve(link, "data/" + folder_name + "/%05d.png" % i)
             i += 1
         except:
             continue
 
+    print("Image downloading complete")
+
 
 if __name__ == "__main__":
-    links = getLinks("n04166281")
-    download_images(links, "sedan")
+    links = getLinks("n03329663")
+    download_images(links, "ferry")

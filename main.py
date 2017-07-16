@@ -1,12 +1,5 @@
 import tensorflow as tf
 import numpy as np
-import pickle
-
-def import_data(path):
-    with open(path, 'rb') as d_file:
-        data = pickle.load(d_file, encoding="bytes")
-        print(data)
-    return data
 
 
 def conv_layer(input, channels_in, channels_out, filter_size, pool_size, name="conv"):
@@ -33,10 +26,10 @@ def fc_layer(input, channels_in, channels_out, name="fcl"):
         return act
 
 
-def network_fn():
-    input_layer = tf.placeholder(tf.float32, shape=[None, 32, 32, 3])
+def network_fn(x):
+    img_2d = tf.reshape(x, [-1, 32, 32, 3], name="2d_reshape")
 
-    conv1 = conv_layer(input_layer, 3, 40, (5, 5), (2, 2), name="conv1")
+    conv1 = conv_layer(img_2d, 3, 40, (5, 5), (2, 2), name="conv1")
     conv2 = conv_layer(conv1, 40, 60, (4, 4), (2, 2), name="conv2")
     conv3 = conv_layer(conv2, 60, 80, (3, 3), (2, 2), name="conv3")
 
