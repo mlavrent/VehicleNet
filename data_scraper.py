@@ -34,5 +34,5 @@ def download_images(links, folder_name):
 
 
 if __name__ == "__main__":
-    links = getLinks("n03329663")
-    download_images(links, "ferry")
+    links = getLinks("n04468005")
+    download_images(links, "train")

@@ -45,7 +45,6 @@ def network_fn(x):
 
 def main(argv):
     sess = tf.Session()
-    import_data("data/cifar-10-python.tar.gz")
 
 
 if __name__ == "__main__":
