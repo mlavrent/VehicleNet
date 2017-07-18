@@ -1,4 +1,4 @@
-from PIL import Image
+from PIL import Image, ImageEnhance
 import numpy as np
 
 class ImagePreparer(object):
@@ -11,8 +11,7 @@ class ImagePreparer(object):
         if len(img_size) != 3:
             raise Not3DimensionsException("ImagePreparer cannot create image with dimension not equal to 3")
 
-    def conv_img_to_arr(self, img_path):
-        im = Image.open(img_path)
+    def conv_img_to_arr(self, im):
         w, h = im.size
         if w > self.img_width:
             im = im.resize((self.img_width, int(h * self.img_width/w)))
@@ -28,11 +27,14 @@ class ImagePreparer(object):
         im_w_bg.paste(im, offset)
         im_data = np.array(im_w_bg.getdata()).reshape((self.img_height, self.img_width, self.img_depth))
 
-        print(im_data.shape)
+        im_data = im_data/255
+        return im_data
 
-    def synthesize_new_data(self, img_arr):
-        pass
-
+    def synthesize_new_data(self, im):
+        # Run this synthesis prior to converting to an array
+        # Flip left-to-right
+        flipped_im = im.transpose(Image.FLIP_LEFT_RIGHT)
+        return flipped_im
 
 class Not3DimensionsException(Exception):
     pass
@@ -41,4 +43,7 @@ class Not3DimensionsException(Exception):
 if __name__ == "__main__":
     ip = ImagePreparer((100, 150, 3))
 
-    ip.conv_img_to_arr("data/tank/00023.png")
+    test_im = Image.open("data/airplane/00031.png")
+
+    # im_arr = ip.conv_img_to_arr(test_im)
+    ip.synthesize_new_data(test_im)
