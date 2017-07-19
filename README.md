@@ -1,8 +1,8 @@
 # VehicleNet
-This is a convolutional neural network implementation in TensorFlow for classifying vehicles of various types. The classes include 2 levels of identification - general vehicle type, and specific vehicle type. For example, a picture of a Boeing 747 would be classified under (air vehicle, airplane). 
+This is a convolutional neural network implementation in TensorFlow for classifying vehicles of various types. The current classes being used are: airplane, bus, tank, and yacht.
 
 ## Data
-The data was collected from [image-net.org](http://www.image-net.org), using their API for collecting image links. The code for downloading the sets of images is located in `datascraper.py`.
+The data was collected from [image-net.org](http://www.image-net.org), using their API for collecting image links. The code for downloading the sets of images is located in `data_scraper.py`.
 
 #### Augmentation
 In order to generate more data for training, the data was augmented in meaninful ways. Currently, for each image in the dataset, a left-right mirror image of that image is also added.
