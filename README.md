@@ -2,7 +2,7 @@
 This is a convolutional neural network implementation in TensorFlow for classifying vehicles of various types. The current classes being used are: airplane, bus, tank, and yacht.
 
 ## Data
-The data was collected from [image-net.org](http://www.image-net.org), using their API for collecting image links. The code for downloading the sets of images is located in `data_scraper.py`. Additional data was obtained from splitting various YouTube videos into seperate frames (e.g. compilation of airplanes landing/taking off).
+The data was collected from [image-net.org](http://www.image-net.org), using their API for collecting image links. The code for downloading the sets of images is located in `data_scraper.py`. Additional data was obtained from splitting various YouTube videos into seperate frames (e.g. compilation of airplanes landing/taking off). In order to do this, the video was downloaded from YouTube and then split using the command `ffmpeg -i input_video.mp4 -r 4/1 final_folder/%06d.png`. This would create four frames per second of video, which then were manually checked for quality.
 
 #### Augmentation
 In order to generate more data for training, the data was augmented in meaninful ways. Currently, for each image in the dataset, a left-right mirror image of that image is also added.
