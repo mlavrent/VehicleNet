@@ -1,5 +1,41 @@
 import tensorflow as tf
 import numpy as np
+from image_preparer import ImagePreparer
+from PIL import Image
+from random import shuffle
+import os
+
+
+def import_data(classes, image_prep):
+    x = []
+    y = []
+    logits_to_class = {}
+
+    i = 0
+    for word in classes:
+        all_files = os.listdir("data/" + word)
+        new_y_arr = np.zeros(len(classes))
+        new_y_arr[i] = 1
+        logits_to_class[word] = new_y_arr
+
+        for file in all_files:
+            img = Image.open(file)
+            flip_img = image_prep.synthesize_new_data(img)
+            img_arr = image_prep.conv_img_to_arr(img)
+            flip_img_arr = image_prep.conv_img_to_arr(flip_img)
+
+            x.append(img_arr)
+            y.append(new_y_arr[:])
+            x.append(flip_img_arr)
+            y.append(new_y_arr[:])
+
+        i += 1
+
+    comb = list(zip(x, y))
+    shuffle(comb)
+    x[:], y[:] = zip(*comb)
+
+    return x, y, logits_to_class
 
 
 def conv_layer(input, channels_in, channels_out, filter_size, pool_size, name="conv"):
@@ -46,6 +82,12 @@ def network_fn(x):
 def main(argv):
     sess = tf.Session()
 
+    x = tf.placeholder(tf.float32, shape=[None, 100, 150, 3], name="in_images")
+    y = tf.placeholder(tf.float32, shape=[None, 4], name="labels")
+    logits = network_fn(x)
+
+    with tf.name_scope("xent"):
+        xent = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y))
 
 if __name__ == "__main__":
     tf.app.run()
