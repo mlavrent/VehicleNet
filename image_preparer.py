@@ -43,40 +43,34 @@ class Not3DimensionsException(Exception):
 
 
 class DataManager:
-    def __init__(self):
-        pass
-
-    def import_data(self, classes, image_prep):
-        x = []
-        y = []
-        logits_to_class = {}
+    def __init__(self, data_dir, image_preparer, exclude_folders=None):
+        self.data_dir = data_dir
+        all_classes = os.listdir(data_dir)
+        for folder in exclude_folders:
+            if folder in all_classes:
+                all_classes.remove(folder)
+        self.all_classes = all_classes
 
         i = 0
-        for word in classes:
-            all_files = os.listdir("data/" + word)
-            new_y_arr = np.zeros(len(classes))
-            new_y_arr[i] = 1
-            logits_to_class[word] = new_y_arr
-
-            for file in all_files:
-                img = Image.open(file)
-                flip_img = image_prep.synthesize_new_data(img)
-                img_arr = image_prep.conv_img_to_arr(img)
-                flip_img_arr = image_prep.conv_img_to_arr(flip_img)
-
-                x.append(img_arr)
-                y.append(new_y_arr[:])
-                x.append(flip_img_arr)
-                y.append(new_y_arr[:])
-
+        class_list = []
+        data_list = []
+        for word in all_classes:
+            img_files = os.listdir(data_dir + "/" + word)
+            logit = np.zeros((len(img_files), len(all_classes)))
+            logit[:, i] = 1
+            class_list.extend(list(logit))
+            data_list.extend(img_files)
             i += 1
-
-        comb = list(zip(x, y))
+        comb = list(zip(class_list, data_list))
         shuffle(comb)
-        x[:], y[:] = zip(*comb)
+        class_list[:], data_list[:] = zip(*comb)
+        self.data_list = data_list
+        self.class_list = class_list
 
-        return x, y, logits_to_class
+        self.image_preparer = image_preparer
 
+    def get_batch(self, start_index, batch_size):
+        pass
 
 if __name__ == "__main__":
     ip = ImagePreparer((100, 150, 3))
