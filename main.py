@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-from image_preparer import ImagePreparer
+from image_preparer import ImagePreparer, DataManager
 
 
 
@@ -72,8 +72,12 @@ def main(argv):
     saver = tf.train.Saver(max_to_keep=5, name="VehicleNet")
 
     # Train
+    batch_size = 100
+    ip = ImagePreparer((100, 150))
+    dm = DataManager("data", ip, exclude_folders=["videos"])
     for i in range(5000):
-        ...
+        x, y = dm.get_batch(i*batch_size, batch_size)
+        
 
 if __name__ == "__main__":
     tf.app.run()
