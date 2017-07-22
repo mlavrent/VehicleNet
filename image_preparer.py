@@ -55,7 +55,7 @@ class DataManager:
         class_list = []
         data_list = []
         for word in all_classes:
-            img_files = os.listdir(data_dir + "/" + word)
+            img_files = [word + "/" + f for f in os.listdir(data_dir + "/" + word)]
             logit = np.zeros((len(img_files), len(all_classes)))
             logit[:, i] = 1
             class_list.extend(list(logit))
@@ -69,13 +69,13 @@ class DataManager:
 
         self.image_preparer = image_preparer
 
-    def get_batch(self, start_index, batch_size):
+    def get_batch(self, step_num, batch_size):
         pass
 
 if __name__ == "__main__":
     ip = ImagePreparer((100, 150, 3))
 
-    test_im = Image.open("data/airplane/00031.png")
+    dm = DataManager("data", ip, exclude_folders=["videos"])
 
-    # im_arr = ip.conv_img_to_arr(test_im)
-    ip.synthesize_new_data(test_im)
+    print(dm.class_list[:10])
+    print(dm.data_list[:10])
