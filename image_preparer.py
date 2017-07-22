@@ -44,7 +44,7 @@ class Not3DimensionsException(Exception):
 
 class DataManager:
     def __init__(self, data_dir, image_preparer, exclude_folders=None):
-        self.data_dir = data_dir
+        self.data_dir = data_dir.strip("/")
         all_classes = os.listdir(data_dir)
         for folder in exclude_folders:
             if folder in all_classes:
@@ -77,7 +77,7 @@ class DataManager:
 
         x = []
         for imf in x_file:
-            im = Image.open("data/" + imf)
+            im = Image.open(self.data_dir + "/" + imf)
             fl_im = self.image_preparer.synthesize_new_data(im)
             im = self.image_preparer.conv_img_to_arr(im)
             fl_im = self.image_preparer.conv_img_to_arr(fl_im)
