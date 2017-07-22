@@ -63,19 +63,31 @@ class DataManager:
             i += 1
         comb = list(zip(class_list, data_list))
         shuffle(comb)
-        class_list[:], data_list[:] = zip(*comb)
-        self.data_list = data_list
-        self.class_list = class_list
+        self.class_list, self.data_list = zip(*comb)
 
         self.image_preparer = image_preparer
 
-    def get_batch(self, step_num, batch_size):
-        pass
+    def get_batch(self, start_pos, batch_size):
+        batch_size //= 2
+        start_pos = start_pos % len(self.data_list)
+        stop_pos = (start_pos + batch_size) % len(self.data_list)
+
+        x_file = self.data_list[start_pos:stop_pos]
+        y = np.array(self.class_list[start_pos:stop_pos]).repeat(2, axis=0)
+
+        x = []
+        for imf in x_file:
+            im = Image.open("data/" + imf)
+            fl_im = self.image_preparer.synthesize_new_data(im)
+            x.append(im)
+            x.append(fl_im)
+
+        return x, y
+
 
 if __name__ == "__main__":
     ip = ImagePreparer((100, 150, 3))
 
     dm = DataManager("data", ip, exclude_folders=["videos"])
 
-    print(dm.class_list[:10])
-    print(dm.data_list[:10])
+    x, y = dm.get_batch(1000, 10)
