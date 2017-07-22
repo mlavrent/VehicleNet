@@ -29,18 +29,16 @@ def fc_layer(input, channels_in, channels_out, name="fcl"):
 
 
 def network_fn(x):
-    img_2d = tf.reshape(x, [-1, 32, 32, 3], name="2d_reshape")
-
-    conv1 = conv_layer(img_2d, 3, 40, (5, 5), (2, 2), name="conv1")
+    conv1 = conv_layer(x, 3, 40, (5, 5), (2, 2), name="conv1")
     conv2 = conv_layer(conv1, 40, 60, (4, 4), (2, 2), name="conv2")
     conv3 = conv_layer(conv2, 60, 80, (3, 3), (2, 2), name="conv3")
 
-    flat_conv3 = tf.reshape(conv3, [-1, 80*4*4], name="flatten")
+    flat_conv3 = tf.reshape(conv3, [-1, 80*13*19], name="flatten")
 
-    fcl1 = fc_layer(flat_conv3, 80*4*4, 2560, name="fc1")
+    fcl1 = fc_layer(flat_conv3, 80*13*19, 2560, name="fc1")
     fcl2 = fc_layer(fcl1, 2560, 1024, name="fc2")
 
-    logits = fc_layer(1024, 10, name="logits")
+    logits = fc_layer(fcl2, 1024, 4, name="logits")
 
     return logits
 
@@ -57,7 +55,7 @@ def main(argv):
         xent = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y))
         tf.summary.scalar("xent", xent)
     with tf.name_scope("train"):
-        train_step = tf.train.AdamOptimizer(1e-4)
+        train_step = tf.train.AdamOptimizer(1e-4).minimize(xent)
     with tf.name_scope("accuracy"):
         correct_prediction = tf.equal(tf.argmax(logits, 1), tf.argmax(y, 1))
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
@@ -73,11 +71,23 @@ def main(argv):
 
     # Train
     batch_size = 100
-    ip = ImagePreparer((100, 150))
+    ip = ImagePreparer((100, 150, 3))
     dm = DataManager("data", ip, exclude_folders=["videos"])
-    for i in range(5000):
-        x, y = dm.get_batch(i*batch_size, batch_size)
-        
+    for i in range(1000):
+        inp, out = dm.get_batch(i*batch_size, batch_size)
+
+        if i%10 == 0:
+            s = sess.run(merged_summary, feed_dict={x: inp, y: out})
+            writer.add_summary(s, global_step=i)
+        if i%50 == 0:
+            train_accuracy = sess.run(accuracy, feed_dict={x: inp, y: out})
+            print("Step: %d, Training accuracy: %.2f" % (i, train_accuracy))
+            saver.save(sess, "trained_models/vehicle_net1", global_step=i)
+
+        sess.run(train_step, feed_dict={x: inp, y: out})
+
+    saver.save(sess, "trained_models/vehicle_net1", global_step=i)
+
 
 if __name__ == "__main__":
     tf.app.run()
