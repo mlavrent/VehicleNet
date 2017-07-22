@@ -1,2 +1,5 @@
 data/
 .idea/
+__pycache__/
+tensorboard/
+trained_models/
