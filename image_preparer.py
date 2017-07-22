@@ -79,6 +79,8 @@ class DataManager:
         for imf in x_file:
             im = Image.open("data/" + imf)
             fl_im = self.image_preparer.synthesize_new_data(im)
+            im = self.image_preparer.conv_img_to_arr(im)
+            fl_im = self.image_preparer.conv_img_to_arr(fl_im)
             x.append(im)
             x.append(fl_im)
 
@@ -90,4 +92,4 @@ if __name__ == "__main__":
 
     dm = DataManager("data", ip, exclude_folders=["videos"])
 
-    x, y = dm.get_batch(1000, 10)
+    x, y = dm.get_batch(1000, 2)
