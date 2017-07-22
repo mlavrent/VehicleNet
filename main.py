@@ -1,41 +1,7 @@
 import tensorflow as tf
 import numpy as np
 from image_preparer import ImagePreparer
-from PIL import Image
-from random import shuffle
-import os
 
-
-def import_data(classes, image_prep):
-    x = []
-    y = []
-    logits_to_class = {}
-
-    i = 0
-    for word in classes:
-        all_files = os.listdir("data/" + word)
-        new_y_arr = np.zeros(len(classes))
-        new_y_arr[i] = 1
-        logits_to_class[word] = new_y_arr
-
-        for file in all_files:
-            img = Image.open(file)
-            flip_img = image_prep.synthesize_new_data(img)
-            img_arr = image_prep.conv_img_to_arr(img)
-            flip_img_arr = image_prep.conv_img_to_arr(flip_img)
-
-            x.append(img_arr)
-            y.append(new_y_arr[:])
-            x.append(flip_img_arr)
-            y.append(new_y_arr[:])
-
-        i += 1
-
-    comb = list(zip(x, y))
-    shuffle(comb)
-    x[:], y[:] = zip(*comb)
-
-    return x, y, logits_to_class
 
 
 def conv_layer(input, channels_in, channels_out, filter_size, pool_size, name="conv"):
@@ -82,12 +48,32 @@ def network_fn(x):
 def main(argv):
     sess = tf.Session()
 
+    # Set up network
     x = tf.placeholder(tf.float32, shape=[None, 100, 150, 3], name="in_images")
     y = tf.placeholder(tf.float32, shape=[None, 4], name="labels")
     logits = network_fn(x)
 
     with tf.name_scope("xent"):
         xent = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y))
+        tf.summary.scalar("xent", xent)
+    with tf.name_scope("train"):
+        train_step = tf.train.AdamOptimizer(1e-4)
+    with tf.name_scope("accuracy"):
+        correct_prediction = tf.equal(tf.argmax(logits, 1), tf.argmax(y, 1))
+        accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+        tf.summary.scalar("accuracy", accuracy)
+
+    # Initialize filewriter and model saver
+    sess.run(tf.global_variables_initializer())
+    writer = tf.summary.FileWriter("tensorboard/vehicle_net/1")
+    writer.add_graph(sess.graph)
+    merged_summary = tf.summary.merge_all()
+
+    saver = tf.train.Saver(max_to_keep=5, name="VehicleNet")
+
+    # Train
+    for i in range(5000):
+        ...
 
 if __name__ == "__main__":
     tf.app.run()

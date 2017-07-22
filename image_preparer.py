@@ -1,7 +1,9 @@
-from PIL import Image, ImageEnhance
 import numpy as np
+from PIL import Image
+from random import shuffle
+import os
 
-class ImagePreparer(object):
+class ImagePreparer:
     def __init__(self, img_size, conv_to_grayscale=False):
         # img_size is a 3-tuple of form (height, width, depth) defining the input image dimensions
         self.make_grayscale = conv_to_grayscale
@@ -38,6 +40,42 @@ class ImagePreparer(object):
 
 class Not3DimensionsException(Exception):
     pass
+
+
+class DataManager:
+    def __init__(self):
+        pass
+
+    def import_data(self, classes, image_prep):
+        x = []
+        y = []
+        logits_to_class = {}
+
+        i = 0
+        for word in classes:
+            all_files = os.listdir("data/" + word)
+            new_y_arr = np.zeros(len(classes))
+            new_y_arr[i] = 1
+            logits_to_class[word] = new_y_arr
+
+            for file in all_files:
+                img = Image.open(file)
+                flip_img = image_prep.synthesize_new_data(img)
+                img_arr = image_prep.conv_img_to_arr(img)
+                flip_img_arr = image_prep.conv_img_to_arr(flip_img)
+
+                x.append(img_arr)
+                y.append(new_y_arr[:])
+                x.append(flip_img_arr)
+                y.append(new_y_arr[:])
+
+            i += 1
+
+        comb = list(zip(x, y))
+        shuffle(comb)
+        x[:], y[:] = zip(*comb)
+
+        return x, y, logits_to_class
 
 
 if __name__ == "__main__":
