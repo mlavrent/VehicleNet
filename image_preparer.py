@@ -66,9 +66,8 @@ class DataManager:
         comb = list(zip(class_list, data_list))
         shuffle(comb)
         self.class_list, self.data_list = zip(*comb)
-
-        self.class_list = self.class_list[:210]
-        self.data_list = self.data_list[:210]
+        self.class_list = list(self.class_list)
+        self.data_list = list(self.data_list)
 
         assert len(self.data_list) == len(self.class_list)
         self.num_data = len(self.data_list)
@@ -84,16 +83,18 @@ class DataManager:
         if start_pos > self.num_data:
             start_pos = start_pos % self.num_data
             stop_pos = start_pos % self.num_data
+            x_files = self.data_list[start_pos:stop_pos]
+            y = np.array(self.class_list[start_pos:stop_pos]).repeat(2, axis=0)
         elif stop_pos > self.num_data:
-            ...
-            #TODO: grab wrapped version of data_list
-
-        x_files = self.data_list[start_pos:stop_pos]
-        y = np.array(self.class_list[start_pos:stop_pos]).repeat(2, axis=0)
+            stop_pos = stop_pos % self.num_data
+            x_files = self.data_list[start_pos:] + (self.data_list[:stop_pos])
+            y = np.array(self.class_list[start_pos:] + (self.class_list[:stop_pos])).repeat(2, axis=0)
+        else:
+            x_files = self.data_list[start_pos:stop_pos]
+            y = np.array(self.class_list[start_pos:stop_pos]).repeat(2, axis=0)
 
         x = []
-        print(start_pos, stop_pos)
-        print(len(self.data_list))
+        print(len(x_files))
         for imf in x_files:
             im = Image.open(self.data_dir + "/" + imf)
             fl_im = self.image_preparer.synthesize_new_data(im)
