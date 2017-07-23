@@ -67,13 +67,26 @@ class DataManager:
         shuffle(comb)
         self.class_list, self.data_list = zip(*comb)
 
+        self.class_list = self.class_list[:210]
+        self.data_list = self.data_list[:210]
+
+        assert len(self.data_list) == len(self.class_list)
+        self.num_data = len(self.data_list)
+
         self.image_preparer = image_preparer
 
-    def get_batch(self, start_pos, batch_size):
-        #TODO: handle overflowing past size of list
+    def get_batch(self, step_num, batch_size):
         batch_size //= 2
-        start_pos = start_pos % len(self.data_list)
-        stop_pos = (start_pos + batch_size) % len(self.data_list)
+        assert batch_size <= self.num_data
+        start_pos = step_num * batch_size
+        stop_pos = start_pos + batch_size
+
+        if start_pos > self.num_data:
+            start_pos = start_pos % self.num_data
+            stop_pos = start_pos % self.num_data
+        elif stop_pos > self.num_data:
+            ...
+            #TODO: grab wrapped version of data_list
 
         x_files = self.data_list[start_pos:stop_pos]
         y = np.array(self.class_list[start_pos:stop_pos]).repeat(2, axis=0)
