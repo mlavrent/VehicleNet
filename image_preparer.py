@@ -82,11 +82,8 @@ class DataManager:
 
         if start_pos > self.num_data:
             start_pos = start_pos % self.num_data
-            stop_pos = start_pos % self.num_data
-            x_files = self.data_list[start_pos:stop_pos]
-            y = np.array(self.class_list[start_pos:stop_pos]).repeat(2, axis=0)
-        elif stop_pos > self.num_data:
             stop_pos = stop_pos % self.num_data
+        if start_pos > stop_pos:
             x_files = self.data_list[start_pos:] + (self.data_list[:stop_pos])
             y = np.array(self.class_list[start_pos:] + (self.class_list[:stop_pos])).repeat(2, axis=0)
         else:
