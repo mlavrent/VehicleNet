@@ -94,7 +94,6 @@ class DataManager:
             y = np.array(self.class_list[start_pos:stop_pos]).repeat(2, axis=0)
 
         x = []
-        print(len(x_files))
         for imf in x_files:
             im = Image.open(self.data_dir + "/" + imf)
             fl_im = self.image_preparer.synthesize_new_data(im)
