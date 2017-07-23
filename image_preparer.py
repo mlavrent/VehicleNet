@@ -23,6 +23,8 @@ class ImagePreparer:
             w, h = im.size
         if self.make_grayscale:
             im = im.convert(mode="L")
+        else:
+            im = im.convert(mode="RGB")
 
         im_w_bg = Image.new(im.mode, (self.img_width, self.img_height))
         offset = (self.img_width - w)//2, (self.img_height - h)//2
@@ -68,15 +70,18 @@ class DataManager:
         self.image_preparer = image_preparer
 
     def get_batch(self, start_pos, batch_size):
+        #TODO: handle overflowing past size of list
         batch_size //= 2
         start_pos = start_pos % len(self.data_list)
         stop_pos = (start_pos + batch_size) % len(self.data_list)
 
-        x_file = self.data_list[start_pos:stop_pos]
+        x_files = self.data_list[start_pos:stop_pos]
         y = np.array(self.class_list[start_pos:stop_pos]).repeat(2, axis=0)
 
         x = []
-        for imf in x_file:
+        print(start_pos, stop_pos)
+        print(len(self.data_list))
+        for imf in x_files:
             im = Image.open(self.data_dir + "/" + imf)
             fl_im = self.image_preparer.synthesize_new_data(im)
             im = self.image_preparer.conv_img_to_arr(im)

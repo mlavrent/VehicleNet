@@ -74,7 +74,7 @@ def main(argv):
     ip = ImagePreparer((100, 150, 3))
     dm = DataManager("data", ip, exclude_folders=["videos"])
     for i in range(1000):
-        inp, out = dm.get_batch(i*batch_size, batch_size)
+        inp, out = dm.get_batch(i*batch_size//2, batch_size)
 
         if i%10 == 0:
             s = sess.run(merged_summary, feed_dict={x: inp, y: out})
