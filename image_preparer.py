@@ -34,7 +34,7 @@ class ImagePreparer:
         im_data = im_data/255
         return im_data
 
-    def synthesize_new_data(self, im):
+    def flip_left_right(self, im):
         # Run this synthesis prior to converting to an array
         # Flip left-to-right
         flipped_im = im.transpose(Image.FLIP_LEFT_RIGHT)
@@ -58,16 +58,20 @@ class DataManager:
         data_list = []
         for word in all_classes:
             img_files = [word + "/" + f for f in os.listdir(data_dir + "/" + word)]
-            logit = np.zeros((len(img_files), len(all_classes)))
+            ed_img_files = [file + "!" for file in img_files]
+
+            logit = np.zeros((2*len(img_files), len(all_classes)))
             logit[:, i] = 1
             class_list.extend(list(logit))
             data_list.extend(img_files)
+            data_list.extend(ed_img_files)
             i += 1
+
         comb = list(zip(class_list, data_list))
         shuffle(comb)
         self.class_list, self.data_list = zip(*comb)
-        self.class_list = list(self.class_list)
-        self.data_list = list(self.data_list)
+        self.class_list = np.array(self.class_list)
+        self.data_list = np.array(self.data_list)
 
         assert len(self.data_list) == len(self.class_list)
         self.num_data = len(self.data_list)
@@ -75,7 +79,6 @@ class DataManager:
         self.image_preparer = image_preparer
 
     def get_batch(self, step_num, batch_size):
-        batch_size //= 2
         assert batch_size <= self.num_data
         start_pos = step_num * batch_size
         stop_pos = start_pos + batch_size
@@ -85,19 +88,21 @@ class DataManager:
             stop_pos = stop_pos % self.num_data
         if start_pos > stop_pos:
             x_files = self.data_list[start_pos:] + (self.data_list[:stop_pos])
-            y = np.array(self.class_list[start_pos:] + (self.class_list[:stop_pos])).repeat(2, axis=0)
+            y = np.array(self.class_list[start_pos:] + (self.class_list[:stop_pos]))
         else:
             x_files = self.data_list[start_pos:stop_pos]
-            y = np.array(self.class_list[start_pos:stop_pos]).repeat(2, axis=0)
+            y = np.array(self.class_list[start_pos:stop_pos])
 
         x = []
         for imf in x_files:
-            im = Image.open(self.data_dir + "/" + imf)
-            fl_im = self.image_preparer.synthesize_new_data(im)
+            if imf[-1] == "!":
+                imf = imf.strip("!")
+                im = Image.open(self.data_dir + "/" + imf)
+                im = self.image_preparer.flip_left_right(im)
+            else:
+                im = Image.open(self.data_dir + "/" + imf)
             im = self.image_preparer.conv_img_to_arr(im)
-            fl_im = self.image_preparer.conv_img_to_arr(fl_im)
             x.append(im)
-            x.append(fl_im)
 
         return x, y
 
@@ -107,4 +112,4 @@ if __name__ == "__main__":
 
     dm = DataManager("data", ip, exclude_folders=["videos"])
 
-    x, y = dm.get_batch(1000, 2)
+    x, y = dm.get_batch(10, 15)
