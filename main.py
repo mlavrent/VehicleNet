@@ -29,7 +29,7 @@ def fc_layer(input, channels_in, channels_out, name="fcl"):
 
 
 def network_fn(x):
-    conv1 = conv_layer(x, 3, 40, (5, 5), (2, 2), name="conv1")
+    conv1 = conv_layer(x, 1, 40, (5, 5), (2, 2), name="conv1")
     conv2 = conv_layer(conv1, 40, 60, (4, 4), (2, 2), name="conv2")
     conv3 = conv_layer(conv2, 60, 80, (3, 3), (2, 2), name="conv3")
 
@@ -47,7 +47,7 @@ def main(argv):
     sess = tf.Session()
 
     # Set up network
-    x = tf.placeholder(tf.float32, shape=[None, 100, 150, 3], name="in_images")
+    x = tf.placeholder(tf.float32, shape=[None, 100, 150, 1], name="in_images")
     y = tf.placeholder(tf.float32, shape=[None, 4], name="labels")
     logits = network_fn(x)
 
@@ -71,7 +71,7 @@ def main(argv):
 
     # Train
     batch_size = 100
-    ip = ImagePreparer((100, 150, 3))
+    ip = ImagePreparer((100, 150, 3), conv_to_grayscale=True)
     dm = DataManager("data", ip, exclude_folders=["videos"])
     for i in range(1000):
         inp, out = dm.get_batch(i, batch_size)
