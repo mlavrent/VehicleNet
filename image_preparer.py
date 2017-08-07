@@ -87,8 +87,8 @@ class DataManager:
             start_pos = start_pos % self.num_data
             stop_pos = stop_pos % self.num_data
         if start_pos > stop_pos:
-            x_files = np.append(self.data_list[start_pos:], (self.data_list[:stop_pos]))
-            y = np.append(self.class_list[start_pos:], self.class_list[:stop_pos])
+            x_files = np.append(self.data_list[start_pos:], self.data_list[:stop_pos], axis=0)
+            y = np.append(self.class_list[start_pos:], self.class_list[:stop_pos], axis=0)
         else:
             x_files = self.data_list[start_pos:stop_pos]
             y = np.array(self.class_list[start_pos:stop_pos])
