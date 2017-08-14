@@ -45,27 +45,28 @@ class Not3DimensionsException(Exception):
 
 
 class DataManager:
-    def __init__(self, data_dir, image_preparer, exclude_folders=None):
+    def __init__(self, data_dir, image_preparer, folder_class_dict):
+        # folder_class_dict: correlate with keys as folders and values as class. e.g. {"tank": "not_airplane"}
         self.data_dir = data_dir.strip("/")
-        all_classes = os.listdir(data_dir)
-        for folder in exclude_folders:
-            if folder in all_classes:
-                all_classes.remove(folder)
+        all_classes = list(set(folder_class_dict.values()))
+        all_folders = list(folder_class_dict.keys())
+        #TODO: use folder_class_dict to correlate data folders to respective classes
         self.all_classes = all_classes
 
-        i = 0
         class_list = []
         data_list = []
-        for word in all_classes:
-            img_files = [word + "/" + f for f in os.listdir(data_dir + "/" + word)]
+        for folder in all_folders:
+            img_files = [folder + "/" + f for f in os.listdir(data_dir + "/" + folder)]
             ed_img_files = [file + "!" for file in img_files]
 
+            img_class = folder_class_dict[folder]
+            log_num = all_classes.index(img_class)
+
             logit = np.zeros((2*len(img_files), len(all_classes)))
-            logit[:, i] = 1
+            logit[:, log_num] = 1
             class_list.extend(list(logit))
             data_list.extend(img_files)
             data_list.extend(ed_img_files)
-            i += 1
 
         comb = list(zip(class_list, data_list))
         shuffle(comb)
