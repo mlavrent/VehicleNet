@@ -50,7 +50,6 @@ class DataManager:
         self.data_dir = data_dir.strip("/")
         all_classes = list(set(folder_class_dict.values()))
         all_folders = list(folder_class_dict.keys())
-        #TODO: use folder_class_dict to correlate data folders to respective classes
         self.all_classes = all_classes
 
         class_list = []
