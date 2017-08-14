@@ -110,6 +110,9 @@ class DataManager:
 if __name__ == "__main__":
     ip = ImagePreparer((100, 150, 3))
 
-    dm = DataManager("data", ip, exclude_folders=["videos"])
+    dm = DataManager("data", ip, {"airplane": "airplane",
+                                  "bus": "not_airplane",
+                                  "tank": "not_airplane",
+                                  "yacht": "not_airplane",})
 
-    x, y = dm.get_batch(10, 15)
+    x, y = dm.get_batch(10, 3)
