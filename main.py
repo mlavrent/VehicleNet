@@ -38,7 +38,7 @@ def network_fn(x):
     fcl1 = fc_layer(flat_conv3, 80*13*19, 2560, name="fc1")
     fcl2 = fc_layer(fcl1, 2560, 1024, name="fc2")
 
-    logits = fc_layer(fcl2, 1024, 4, name="logits")
+    logits = fc_layer(fcl2, 1024, 2, name="logits")
 
     return logits
 
@@ -48,7 +48,7 @@ def main(argv):
 
     # Set up network
     x = tf.placeholder(tf.float32, shape=[None, 100, 150, 1], name="in_images")
-    y = tf.placeholder(tf.float32, shape=[None, 4], name="labels")
+    y = tf.placeholder(tf.float32, shape=[None, 2], name="labels")
     logits = network_fn(x)
 
     with tf.name_scope("xent"):
@@ -72,7 +72,10 @@ def main(argv):
     # Train
     batch_size = 100
     ip = ImagePreparer((100, 150, 3), conv_to_grayscale=True)
-    dm = DataManager("data", ip, exclude_folders=["videos"])
+    dm = DataManager("data", ip, {"airplane": "airplane",
+                                  "bus": "not_airplane",
+                                  "tank": "not_airplane",
+                                  "yacht": "not_airplane",})
     for i in range(1000):
         inp, out = dm.get_batch(i, batch_size)
 
