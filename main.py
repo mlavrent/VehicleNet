@@ -79,7 +79,7 @@ def main(argv):
     for i in range(1000):
         inp, out = dm.get_batch(i, batch_size)
 
-        if i%10 == 0:
+        if i%1 == 0:
             s = sess.run(merged_summary, feed_dict={x: inp, y: out})
             writer.add_summary(s, global_step=i)
         if i%50 == 0:
